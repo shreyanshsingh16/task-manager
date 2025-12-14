@@ -41,7 +41,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "https://yourusername.github.io/task-manager",
+  "homepage": "https://shreyanshsingh16.github.io/task-manager",
   "eslintConfig": {
     "extends": [
       "react-app",
