@@ -9,10 +9,7 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Plus, CheckSquare } from 'lucide-react';
 import { TaskColumn } from './components/TaskColumn';
