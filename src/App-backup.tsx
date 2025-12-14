@@ -295,8 +295,6 @@ function App() {
     setIsFormOpen(true);
   };
 
-
-
   const handleClearFilters = () => {
     setPriorityFilter('All');
     setStatusFilter('All');
