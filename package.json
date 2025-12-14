@@ -36,11 +36,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "npm install && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "render-build": "npm install --legacy-peer-deps && npm run build-only",
+    "build-only": "react-scripts build"
   },
   "homepage": "https://shreyanshsingh16.github.io/task-manager",
   "eslintConfig": {
