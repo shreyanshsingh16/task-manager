@@ -1,5 +1,9 @@
 import React from 'react';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { useDroppable } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { TaskCard } from './TaskCard';
 import { Task, Status } from '../types/task';
 import { cn } from '../lib/utils';
@@ -31,6 +35,10 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
   onDeleteTask,
   duplicateTasks,
 }) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: title,
+  });
+
   return (
     <div className={cn(
       "flex-1 min-w-0 rounded-lg border-2 border-dashed p-4",
@@ -43,42 +51,28 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
         </span>
       </div>
       
-      <Droppable droppableId={title}>
-        {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className={cn(
-              "min-h-[200px] transition-colors",
-              snapshot.isDraggingOver && "bg-white/50"
-            )}
-          >
-            {tasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={cn(
-                      "transition-transform",
-                      snapshot.isDragging && "rotate-2 shadow-lg"
-                    )}
-                  >
-                    <TaskCard
-                      task={task}
-                      onEdit={onEditTask}
-                      onDelete={onDeleteTask}
-                      isDuplicate={duplicateTasks.has(task.id)}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
+      <SortableContext 
+        items={tasks.map(task => task.id)} 
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          ref={setNodeRef}
+          className={cn(
+            "min-h-[200px] transition-colors",
+            isOver && "bg-white/50"
+          )}
+        >
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onEdit={onEditTask}
+              onDelete={onDeleteTask}
+              isDuplicate={duplicateTasks.has(task.id)}
+            />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 };

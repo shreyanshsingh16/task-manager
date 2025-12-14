@@ -1,6 +1,8 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Calendar, Clock, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Task, Priority } from '../types/task';
@@ -27,12 +29,33 @@ const priorityIcons: Record<Priority, React.ReactNode> = {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, isDuplicate }) => {
   const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'Completed';
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
-    <Card className={cn(
-      "mb-3 cursor-pointer hover:shadow-md transition-shadow",
-      isOverdue && "border-red-300 bg-red-50"
-    )}>
+    <Card 
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "mb-3 cursor-pointer hover:shadow-md transition-shadow",
+        isOverdue && "border-red-300 bg-red-50",
+        isDragging && "opacity-50 rotate-2 shadow-lg"
+      )}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">

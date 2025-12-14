@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { Plus, CheckSquare } from 'lucide-react';
 import { TaskColumn } from './components/TaskColumn';
 import { TaskForm } from './components/TaskForm';
@@ -140,20 +154,20 @@ function App() {
     setIsFormOpen(true);
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-    if (!destination) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
+    if (!over) return;
 
-    const taskId = parseInt(draggableId);
-    const newStatus = destination.droppableId as Status;
+    const taskId = parseInt(active.id.toString());
+    const newStatus = over.id as Status;
 
     setTasks(prev => prev.map(task =>
       task.id === taskId ? { ...task, status: newStatus } : task
@@ -204,7 +218,11 @@ function App() {
         </div>
 
         {/* Task Board */}
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {(['To-Do', 'In-Progress', 'Completed'] as Status[]).map(status => (
               <TaskColumn
@@ -217,7 +235,7 @@ function App() {
               />
             ))}
           </div>
-        </DragDropContext>
+        </DndContext>
       </main>
 
       {/* Task Form Modal */}
