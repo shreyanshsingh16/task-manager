@@ -151,6 +151,7 @@ const SimpleTaskColumn: React.FC<{
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'All'>('All');
@@ -164,14 +165,23 @@ function App() {
         // Try to load from localStorage first
         const savedTasks = localStorage.getItem('tasks');
         if (savedTasks) {
+          console.log('Loading tasks from localStorage');
           setTasks(JSON.parse(savedTasks));
-        } else {
-          // Load from JSON file if no saved tasks
-          const response = await fetch('/tasks.json');
-          const initialTasks = await response.json();
-          setTasks(initialTasks);
-          localStorage.setItem('tasks', JSON.stringify(initialTasks));
+          return;
         }
+
+        // Load from JSON file if no saved tasks
+        console.log('Fetching tasks from /tasks.json');
+        const response = await fetch('/tasks.json');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const initialTasks = await response.json();
+        console.log('Successfully loaded tasks:', initialTasks);
+        setTasks(initialTasks);
+        localStorage.setItem('tasks', JSON.stringify(initialTasks));
       } catch (error) {
         console.error('Error loading tasks:', error);
         // Fallback data if fetch fails
@@ -184,9 +194,31 @@ function App() {
             status: "To-Do" as Status,
             dueDate: "2025-02-12T09:00:00Z",
             createdAt: "2025-01-25T14:10:00Z"
+          },
+          {
+            id: 102,
+            title: "Setup Database Schema",
+            description: "Design and implement the database structure for user management",
+            priority: "Medium" as Priority,
+            status: "In-Progress" as Status,
+            dueDate: "2025-02-15T17:00:00Z",
+            createdAt: "2025-01-26T09:30:00Z"
+          },
+          {
+            id: 103,
+            title: "Write Unit Tests",
+            description: "Create comprehensive unit tests for authentication module",
+            priority: "Low" as Priority,
+            status: "Completed" as Status,
+            dueDate: "2025-02-10T12:00:00Z",
+            createdAt: "2025-01-24T11:15:00Z"
           }
         ];
+        console.log('Using fallback tasks:', fallbackTasks);
         setTasks(fallbackTasks);
+        localStorage.setItem('tasks', JSON.stringify(fallbackTasks));
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -306,6 +338,18 @@ function App() {
     setIsFormOpen(false);
     setEditingTask(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <CheckSquare className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Task Manager...</h2>
+          <p className="text-gray-600">Please wait while we load your tasks</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
